@@ -1,0 +1,44 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TecnoClick</title>
+  <link rel="icon" href="/assets/logo.svg" />
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner container">
+      <div class="logo"><img src="/assets/logo.svg" width="28" height="28"/><span>TecnoClick</span></div>
+      <div class="flex" style="margin-left:auto">
+        <input class="input" id="searchBox" placeholder="Buscar productos (⌘/Ctrl + K)"/>
+        <a class="btn-ghost" href="#/favoritos">❤️ Favoritos</a>
+        <a class="btn-ghost" href="#/comparar">🔍 Comparar</a>
+        <a class="btn-ghost" href="#/carrito">🛒 Carrito <span id="cartCount" class="badge">0</span></a>
+        <a class="btn" href="#/login" id="loginBtn">Entrar</a>
+        <div id="userMenu" class="hidden">
+          <a class="btn-ghost" href="#/perfil">👤 Perfil</a>
+          <a class="btn-ghost" href="#/ordenes">📦 Órdenes</a>
+          <a class="btn-ghost" href="#/admin">⚙️ Admin</a>
+          <button class="btn" id="logoutBtn">Salir</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" id="app"></div>
+
+  <div class="footer">
+    © <span id="year"></span> TecnoClick — Un marketplace demo con estilo moderno.
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

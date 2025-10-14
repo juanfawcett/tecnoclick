@@ -1,0 +1,47 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MockPay - TecnoClick</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body class="container">
+  <h2>MockPay — Simulador de pasarela de pagos</h2>
+  <div class="card">
+    <p>Orden: <b id="oid"></b></p>
+    <p>Método: <b id="method"></b></p>
+    <p>Total: <b id="amount"></b></p>
+    <div class="flex">
+      <button class="btn" id="ok">Confirmar pago</button>
+      <button class="btn-ghost" id="fail">Fallar pago</button>
+      <a class="btn-ghost" href="/">Regresar</a>
+    </div>
+  </div>
+  <script>
+    const qs = (s)=>document.querySelector(s);
+    const params = new URLSearchParams(location.search);
+    const oid = params.get('order_id');
+    const amount = Number(params.get('amount')||0);
+    const method = params.get('method')||'card';
+    qs('#oid').textContent = oid;
+    qs('#amount').textContent = new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP'}).format(amount/100);
+    qs('#method').textContent = method.toUpperCase();
+    async function post(path, body){
+      const res = await fetch(path, { method:'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+      return res.json();
+    }
+    qs('#ok').addEventListener('click', async ()=>{
+      await post('/api/orders/'+oid+'/confirm', { success:true });
+      alert('Pago confirmado. ¡Gracias!');
+      location.href = '/#/';
+    });
+    qs('#fail').addEventListener('click', async ()=>{
+      await post('/api/orders/'+oid+'/confirm', { success:false });
+      alert('Pago fallido.');
+      location.href = '/#/';
+    });
+  </script>
+</body>
+</html>
