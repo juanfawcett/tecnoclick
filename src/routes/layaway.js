@@ -11,9 +11,11 @@ router.post('/create', authRequired, async (req, res) => {
   const db = getDb();
   try {
     const { product_id, deposit_percent = 20, installments = 3 } = req.body;
-    const p = await get(db, `SELECT * FROM products WHERE id=$1 AND active=1`, [
-      product_id,
-    ]);
+    const p = await get(
+      db,
+      `SELECT * FROM products WHERE id=$1 AND active=TRUE`,
+      [product_id]
+    );
     if (!p) return res.status(404).json({ error: 'Producto no disponible' });
     const total = p.price_cents;
     const deposit = Math.floor(total * (deposit_percent / 100));

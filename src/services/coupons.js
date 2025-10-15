@@ -2,9 +2,11 @@ import { get, run } from '../db/db.js';
 
 export async function validateCoupon(db, code) {
   if (!code) return null;
-  const c = await get(db, `SELECT * FROM coupons WHERE code=$1 AND active=1`, [
-    code,
-  ]);
+  const c = await get(
+    db,
+    `SELECT * FROM coupons WHERE code=$1 AND active=TRUE`,
+    [code]
+  );
   if (!c) return null;
   const now = new Date();
   if (c.start_date && new Date(c.start_date) > now) return null;

@@ -63,9 +63,11 @@ router.post('/items', async (req, res) => {
   const db = getDb();
   try {
     const { product_id, qty } = req.body;
-    const p = await get(db, `SELECT * FROM products WHERE id=$1 AND active=1`, [
-      product_id,
-    ]);
+    const p = await get(
+      db,
+      `SELECT * FROM products WHERE id=$1 AND active=TRUE`,
+      [product_id]
+    );
     if (!p) return res.status(404).json({ error: 'Producto no disponible' });
     if (qty < 1) return res.status(400).json({ error: 'Cantidad inválida' });
     const cartId = req.cookies['tc_cart'] || null;

@@ -6,7 +6,7 @@ export async function applyQuantityDiscounts(db, items) {
   for (const it of items) {
     const discounts = await all(
       db,
-      `SELECT * FROM product_discounts WHERE product_id=$1 AND active=1`,
+      `SELECT * FROM product_discounts WHERE product_id=$1 AND active=TRUE`,
       [it.product_id]
     );
     let price = it.price_cents;

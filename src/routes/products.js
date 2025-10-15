@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     const q = `%${search}%`;
     const rows = await all(
       db,
-      `SELECT * FROM products WHERE active=1 AND name LIKE $1 AND ($2='' OR category=$3)`,
+      `SELECT * FROM products WHERE active=TRUE AND name LIKE $1 AND ($2='' OR category=$3)`,
       [q, category, category]
     );
     rows.forEach((r) => {
@@ -57,7 +57,7 @@ router.post('/', authRequired, adminOnly, async (req, res) => {
       category,
       images = [],
       attributes = {},
-      active = 1,
+      active = 'TRUE',
     } = req.body;
     const r = await run(
       db,
@@ -108,7 +108,7 @@ router.put('/:id', authRequired, adminOnly, async (req, res) => {
         category,
         JSON.stringify(images || []),
         JSON.stringify(attributes || {}),
-        active ? 1 : 0,
+        active ? 'TRUE' : 'FALSE',
         req.params.id,
       ]
     );
@@ -124,7 +124,9 @@ router.put('/:id', authRequired, adminOnly, async (req, res) => {
 router.delete('/:id', authRequired, adminOnly, async (req, res) => {
   const db = getDb();
   try {
-    await run(db, `UPDATE products SET active=0 WHERE id=$1`, [req.params.id]);
+    await run(db, `UPDATE products SET active=FALSE WHERE id=$1`, [
+      req.params.id,
+    ]);
     res.json({ ok: true });
   } catch (e) {
     console.error('🚀 ~ e:', e);

@@ -28,7 +28,7 @@ router.post('/', authRequired, adminOnly, async (req, res) => {
       max_uses = 0,
       start_date = null,
       end_date = null,
-      active = 1,
+      active = 'TRUE',
     } = req.body;
     await run(
       db,
@@ -41,7 +41,7 @@ router.post('/', authRequired, adminOnly, async (req, res) => {
         max_uses,
         start_date,
         end_date,
-        active ? 1 : 0,
+        active ? 'TRUE' : 'FALSE',
       ]
     );
     res.json({ ok: true });
