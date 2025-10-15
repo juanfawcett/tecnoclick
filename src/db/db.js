@@ -9,24 +9,28 @@ const __dirname = path.dirname(__filename);
 let ensured = false;
 
 export async function ensureDb() {
-  console.log('🚀 ~ ensureDb ~ ensured:', ensured);
-  if (ensured) return;
-  ensured = true;
-  // Ejecuta migraciones (schema_pg.sql) una vez por cold start
-  const schemaPath = path.join(__dirname, 'schema.sql');
-  console.log('🚀 ~ ensureDb ~ schemaPath:', schemaPath);
-  const ddl = fs.readFileSync(schemaPath, 'utf-8');
-  console.log('🚀 ~ ensureDb ~ ddl:', ddl);
-  // dividir por ';' de forma simple
-  const statements = ddl
-    .split(/;\s*$/m)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  console.log('🚀 ~ ensureDb ~ statements:', statements);
-  for (const stmt of statements) {
-    await sql.query(stmt);
+  try {
+    console.log('🚀 ~ ensureDb ~ ensured:', ensured);
+    if (ensured) return;
+    ensured = true;
+    // Ejecuta migraciones (schema_pg.sql) una vez por cold start
+    const schemaPath = path.join(__dirname, 'schema.sql');
+    console.log('🚀 ~ ensureDb ~ schemaPath:', schemaPath);
+    const ddl = fs.readFileSync(schemaPath, 'utf-8');
+    console.log('🚀 ~ ensureDb ~ ddl:', ddl);
+    // dividir por ';' de forma simple
+    const statements = ddl
+      .split(/;\s*$/m)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    console.log('🚀 ~ ensureDb ~ statements:', statements);
+    for (const stmt of statements) {
+      await sql.query(stmt);
+    }
+    console.log('ended ensureDb');
+  } catch (e) {
+    console.error('🚀 ~ ensureDb ~ e:', e);
   }
-  console.log('ended ensureDb');
 }
 
 export function getDb() {
