@@ -1,17 +1,18 @@
 {
   "name": "tecnoclick",
   "version": "1.0.0",
-  "description": "TecnoClick - marketplace sencillo con checkout de invitado y usuarios, cupones, descuentos, plan separe y m\u00f3dulo admin.",
+  "description": "TecnoClick - marketplace sencillo con checkout de invitado y usuarios, cupones, descuentos, plan separe y módulo admin.",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "migrate": "node src/db/migrate.js",
-    "seed": "node src/db/seed.js",
+    "migrate:pg": "node -e \"import('./src/db/db.js').then(m=>m.ensureDb())\"",
+    "seed:pg": "node src/db/seed.js",
     "build": "echo 'No build step required (vanilla JS SPA)';"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
@@ -22,7 +23,6 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "pdfkit": "^0.13.0",
-    "sqlite3": "^5.1.7",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

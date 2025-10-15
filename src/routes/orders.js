@@ -16,7 +16,7 @@ const router = express.Router();
 async function buildCartPricing(db, cartId, couponCode) {
   const items = await all(
     db,
-    `SELECT ci.*, p.name, p.price_cents, p.stock FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=?`,
+    `SELECT ci.*, p.name, p.price_cents, p.stock FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=$1`,
     [cartId]
   );
   if (items.length === 0)
@@ -52,7 +52,7 @@ router.post('/checkout', antifraudCheck, async (req, res) => {
       return res.status(400).json({ error: 'Carrito vacío' });
     // Validar stock
     for (const it of pricing.items) {
-      const p = await get(db, `SELECT stock FROM products WHERE id=?`, [
+      const p = await get(db, `SELECT stock FROM products WHERE id=$1`, [
         it.product_id,
       ]);
       if (it.qty > p.stock)
@@ -68,7 +68,7 @@ router.post('/checkout', antifraudCheck, async (req, res) => {
     await run(
       db,
       `INSERT INTO orders (id,user_id,email,shipping_address,billing_address,status,subtotal_cents,discount_cents,tax_cents,total_cents,coupon_code,payment_method,is_guest)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
       [
         orderId,
         null,
@@ -89,7 +89,7 @@ router.post('/checkout', antifraudCheck, async (req, res) => {
     for (const it of pricing.items) {
       await run(
         db,
-        `INSERT INTO order_items (order_id,product_id,name_snapshot,price_cents_snapshot,qty) VALUES (?,?,?,?,?)`,
+        `INSERT INTO order_items (order_id,product_id,name_snapshot,price_cents_snapshot,qty) VALUES ($1,$2,$3,$4,$5)`,
         [orderId, it.product_id, it.name, it.discounted_price_cents, it.qty]
       );
     }
@@ -105,7 +105,7 @@ router.post('/checkout', antifraudCheck, async (req, res) => {
       return res.status(400).json({ error: 'Orden rechazada por seguridad' });
     }
     if (decision === 'review') {
-      await run(db, `UPDATE orders SET status='under_review' WHERE id=?`, [
+      await run(db, `UPDATE orders SET status='under_review' WHERE id=$1`, [
         orderId,
       ]);
       await notify(db, {
@@ -129,11 +129,11 @@ router.post('/checkout', antifraudCheck, async (req, res) => {
 router.get('/:orderId', async (req, res) => {
   const db = getDb();
   try {
-    const o = await get(db, `SELECT * FROM orders WHERE id=?`, [
+    const o = await get(db, `SELECT * FROM orders WHERE id=$1`, [
       req.params.orderId,
     ]);
     if (!o) return res.status(404).json({ error: 'No encontrado' });
-    const items = await all(db, `SELECT * FROM order_items WHERE order_id=?`, [
+    const items = await all(db, `SELECT * FROM order_items WHERE order_id=$1`, [
       req.params.orderId,
     ]);
     res.json({ order: o, items });
@@ -149,23 +149,23 @@ router.post('/:orderId/confirm', async (req, res) => {
   const db = getDb();
   try {
     const { success = true } = req.body;
-    const o = await get(db, `SELECT * FROM orders WHERE id=?`, [
+    const o = await get(db, `SELECT * FROM orders WHERE id=$1`, [
       req.params.orderId,
     ]);
     if (!o) return res.status(404).json({ error: 'No encontrado' });
     if (!success) {
-      await run(db, `UPDATE orders SET status='payment_failed' WHERE id=?`, [
+      await run(db, `UPDATE orders SET status='payment_failed' WHERE id=$1`, [
         o.id,
       ]);
       return res.json({ ok: true });
     }
     // Marcar pagado, descontar stock, generar factura
-    await run(db, `UPDATE orders SET status='paid' WHERE id=?`, [o.id]);
-    const items = await all(db, `SELECT * FROM order_items WHERE order_id=?`, [
+    await run(db, `UPDATE orders SET status='paid' WHERE id=$1`, [o.id]);
+    const items = await all(db, `SELECT * FROM order_items WHERE order_id=$1`, [
       o.id,
     ]);
     for (const it of items) {
-      await run(db, `UPDATE products SET stock = stock - ? WHERE id=?`, [
+      await run(db, `UPDATE products SET stock = stock - $1 WHERE id=$2`, [
         it.qty,
         it.product_id,
       ]);

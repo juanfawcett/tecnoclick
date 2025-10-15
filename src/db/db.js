@@ -1,52 +1,52 @@
-
-import sqlite3 from 'sqlite3';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
+import { sql } from '@vercel/postgres';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbFile = path.join(__dirname, 'tecnoclick.sqlite');
+
+let ensured = false;
 
 export async function ensureDb() {
-  if (!fs.existsSync(dbFile)) {
-    console.log('Creando base de datos...');
-    const { spawnSync } = await import('node:child_process');
-    const migrate = spawnSync('node', [path.join(__dirname, 'migrate.js')], { stdio: 'inherit' });
-    if (migrate.status !== 0) {
-      throw new Error('Migración fallida');
+  try {
+    console.log('🚀 ~ ensureDb ~ ensured:', ensured);
+    if (ensured) return;
+    ensured = true;
+    // Ejecuta migraciones (schema_pg.sql) una vez por cold start
+    const schemaPath = path.join(__dirname, 'schema.sql');
+    console.log('🚀 ~ ensureDb ~ schemaPath:', schemaPath);
+    const ddl = fs.readFileSync(schemaPath, 'utf-8');
+    console.log('🚀 ~ ensureDb ~ ddl:', ddl);
+    // dividir por ';' de forma simple
+    const statements = ddl
+      .split(/;\s*$/m)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    console.log('🚀 ~ ensureDb ~ statements:', statements);
+    for (const stmt of statements) {
+      await sql.query(stmt);
     }
-    const seed = spawnSync('node', [path.join(__dirname, 'seed.js')], { stdio: 'inherit' });
-    if (seed.status !== 0) {
-      throw new Error('Seed fallido');
-    }
+    console.log('ended ensureDb');
+  } catch (e) {
+    console.error('🚀 ~ ensureDb ~ e:', e);
   }
 }
 
 export function getDb() {
-  const db = new sqlite3.Database(dbFile);
-  return db;
+  // @vercel/postgres expone 'sql' directamente; lo retornamos por consistencia
+  return sql;
 }
 
-// Helpers promisificados
-export function run(db, sql, params=[]) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function(err) {
-      if (err) reject(err); else resolve(this);
-    });
-  });
+// Helpers (mismo API que antes pero versión PG)
+export async function run(db, q, params = []) {
+  return db.query(q, params);
 }
-export function get(db, sql, params=[]) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, function(err, row) {
-      if (err) reject(err); else resolve(row);
-    });
-  });
+export async function get(db, q, params = []) {
+  const r = await db.query(q, params);
+  return r.rows[0] || null;
 }
-export function all(db, sql, params=[]) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, function(err, rows) {
-      if (err) reject(err); else resolve(rows);
-    });
-  });
+export async function all(db, q, params = []) {
+  const r = await db.query(q, params);
+  return r.rows || [];
 }

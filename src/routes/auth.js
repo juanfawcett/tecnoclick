@@ -12,15 +12,15 @@ router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     if (!email || !password)
       return res.status(400).json({ error: 'Email y password requeridos' });
-    const dup = await get(db, `SELECT id FROM users WHERE email=?`, [email]);
+    const dup = await get(db, `SELECT id FROM users WHERE email=$1`, [email]);
     if (dup) return res.status(400).json({ error: 'Email ya registrado' });
     const hash = await bcrypt.hash(password, 10);
     const r = await run(
       db,
-      `INSERT INTO users (name,email,password_hash) VALUES (?,?,?)`,
+      `INSERT INTO users (name,email,password_hash) VALUES ($1,$2,$3) RETURNING id`,
       [name || '', email, hash]
     );
-    const user = { id: r.lastID, email, role: 'user', name: name || '' };
+    const user = { id: r.rows[0].id, email, role: 'user', name: name || '' };
     const token = jwt.sign(user, process.env.JWT_SECRET || 'changeme', {
       expiresIn: '7d',
     });
@@ -38,7 +38,7 @@ router.post('/login', async (req, res) => {
   const db = getDb();
   try {
     const { email, password } = req.body;
-    const u = await get(db, `SELECT * FROM users WHERE email=?`, [email]);
+    const u = await get(db, `SELECT * FROM users WHERE email=$1`, [email]);
     if (!u) return res.status(400).json({ error: 'Credenciales inválidas' });
     const ok = await bcrypt.compare(password, u.password_hash);
     if (!ok) return res.status(400).json({ error: 'Credenciales inválidas' });
@@ -66,7 +66,7 @@ router.get('/profile', authRequired, async (req, res) => {
   try {
     const u = await get(
       db,
-      `SELECT id,name,email,role,address FROM users WHERE id=?`,
+      `SELECT id,name,email,role,address FROM users WHERE id=$1`,
       [req.user.id]
     );
     res.json({
@@ -86,7 +86,7 @@ router.put('/profile', authRequired, async (req, res) => {
     const { name, address } = req.body;
     await run(
       db,
-      `UPDATE users SET name=?, address=?, updated_at=datetime('now') WHERE id=?`,
+      `UPDATE users SET name=$1, address=$2, updated_at=NOW() WHERE id=$3`,
       [name || '', JSON.stringify(address || {}), req.user.id]
     );
     res.json({ ok: true });

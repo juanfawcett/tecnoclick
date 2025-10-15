@@ -8,7 +8,7 @@ router.post('/init', async (req, res) => {
   const db = getDb();
   try {
     const { order_id, method } = req.body;
-    const o = await get(db, `SELECT * FROM orders WHERE id=?`, [order_id]);
+    const o = await get(db, `SELECT * FROM orders WHERE id=$1`, [order_id]);
     if (!o) return res.status(404).json({ error: 'Orden no encontrada' });
     const data = initMockPayment({
       order_id,
@@ -29,7 +29,7 @@ router.post('/mock/confirm', async (req, res) => {
   try {
     const { order_id, success = true } = req.body;
     // marcar pagado
-    await run(db, `UPDATE orders SET status=? WHERE id=?`, [
+    await run(db, `UPDATE orders SET status=$1 WHERE id=$2`, [
       success ? 'paid' : 'payment_failed',
       order_id,
     ]);

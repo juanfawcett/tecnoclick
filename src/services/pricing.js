@@ -1,15 +1,18 @@
-
 import { all, get } from '../db/db.js';
 
 export async function applyQuantityDiscounts(db, items) {
   // items: [{product_id, qty, price_cents}]
   const result = [];
   for (const it of items) {
-    const discounts = await all(db, `SELECT * FROM product_discounts WHERE product_id=? AND active=1`, [it.product_id]);
+    const discounts = await all(
+      db,
+      `SELECT * FROM product_discounts WHERE product_id=$1 AND active=1`,
+      [it.product_id]
+    );
     let price = it.price_cents;
     for (const d of discounts) {
       if (it.qty >= d.min_qty) {
-        price = Math.round(price * (1 - (d.percent/100)));
+        price = Math.round(price * (1 - d.percent / 100));
       }
     }
     result.push({ ...it, discounted_price_cents: price });
@@ -19,7 +22,10 @@ export async function applyQuantityDiscounts(db, items) {
 
 export function totalsWithCoupon(items, coupon) {
   // items: [{discounted_price_cents, qty}]
-  const subtotal = items.reduce((s, it) => s + it.discounted_price_cents * it.qty, 0);
+  const subtotal = items.reduce(
+    (s, it) => s + it.discounted_price_cents * it.qty,
+    0
+  );
   let discount = 0;
   if (coupon) {
     if (coupon.kind === 'percent') {
