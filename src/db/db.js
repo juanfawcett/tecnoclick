@@ -13,7 +13,7 @@ export async function ensureDb() {
   if (ensured) return;
   ensured = true;
   // Ejecuta migraciones (schema_pg.sql) una vez por cold start
-  const schemaPath = path.join(__dirname, 'schema_pg.sql');
+  const schemaPath = path.join(__dirname, 'schema.sql');
   console.log('🚀 ~ ensureDb ~ schemaPath:', schemaPath);
   const ddl = fs.readFileSync(schemaPath, 'utf-8');
   console.log('🚀 ~ ensureDb ~ ddl:', ddl);

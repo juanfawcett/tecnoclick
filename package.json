@@ -8,7 +8,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "migrate:pg": "node -e \"import('./src/db/db.js').then(m=>m.ensureDb())\"",
-    "seed:pg": "node src/db/seed_pg.js",
+    "seed:pg": "node src/db/seed.js",
     "build": "echo 'No build step required (vanilla JS SPA)';"
   },
   "dependencies": {
