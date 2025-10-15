@@ -11,10 +11,13 @@ export default function Compare() {
       setProducts([]);
       return;
     }
-    const r = await api(`${import.meta.env.VITE_API_URL}/api/`, {
-      method: 'POST',
-      body: { ids },
-    });
+    const r = await api(
+      `${import.meta.env.VITE_API_URL}/api/products/compare`,
+      {
+        method: 'POST',
+        body: { ids },
+      }
+    );
     setProducts(r.products || []);
   }
   useEffect(() => {

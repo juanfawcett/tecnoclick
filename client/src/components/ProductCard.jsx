@@ -5,7 +5,7 @@ import { api, fmtCOP, track, CompareStore } from '../lib/api';
 
 export default function ProductCard({ p }) {
   async function add() {
-    await api(`${import.meta.env.VITE_API_URL}/api/`, {
+    await api(`${import.meta.env.VITE_API_URL}/api/cart/items`, {
       method: 'POST',
       body: { product_id: p.id, qty: 1 },
     });

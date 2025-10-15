@@ -8,7 +8,7 @@ export default function Cart() {
   const [coupon, setCoupon] = useState('');
 
   async function load() {
-    const r = await api(`${import.meta.env.VITE_API_URL}/api/`);
+    const r = await api(`${import.meta.env.VITE_API_URL}/api/cart`);
     setItems(r.items || []);
     const sum = r.items.reduce(
       (s, i) => s + i.discounted_price_cents * i.qty,
@@ -21,7 +21,7 @@ export default function Cart() {
   }, []);
 
   async function removeItem(id) {
-    await api(`${import.meta.env.VITE_API_URL}/api/` + id, {
+    await api(`${import.meta.env.VITE_API_URL}/api/cart/items/` + id, {
       method: 'DELETE',
     });
     await load();
@@ -29,10 +29,13 @@ export default function Cart() {
   }
   async function applyCup() {
     try {
-      const r = await api(`${import.meta.env.VITE_API_URL}/api/`, {
-        method: 'POST',
-        body: { code: coupon.trim() },
-      });
+      const r = await api(
+        `${import.meta.env.VITE_API_URL}/api/cart/apply-coupon`,
+        {
+          method: 'POST',
+          body: { code: coupon.trim() },
+        }
+      );
       setTotText(
         `Subtotal: ${fmtCOP(r.totals.subtotal)} | Desc: -${fmtCOP(
           r.totals.discount

@@ -10,7 +10,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     (async () => {
       try {
-        const { user } = await api(`${import.meta.env.VITE_API_URL}/api/`);
+        const { user } = await api(
+          `${import.meta.env.VITE_API_URL}/api/auth/profile`
+        );
         setUser(user);
       } catch {}
       setLoading(false);
@@ -18,21 +20,26 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(email, password) {
-    const data = await api(`${import.meta.env.VITE_API_URL}/api/`, {
+    const data = await api(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
       method: 'POST',
       body: { email, password },
     });
     setUser(data.user);
   }
   async function register({ name, email, password }) {
-    const data = await api(`${import.meta.env.VITE_API_URL}/api/`, {
-      method: 'POST',
-      body: { name, email, password },
-    });
+    const data = await api(
+      `${import.meta.env.VITE_API_URL}/api/auth/register`,
+      {
+        method: 'POST',
+        body: { name, email, password },
+      }
+    );
     setUser(data.user);
   }
   async function logout() {
-    await api(`${import.meta.env.VITE_API_URL}/api/`, { method: 'POST' });
+    await api(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
+      method: 'POST',
+    });
     setUser(null);
   }
 

@@ -12,7 +12,8 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       const r = await api(
-        `${import.meta.env.VITE_API_URL}/api/` + encodeURIComponent(q)
+        `${import.meta.env.VITE_API_URL}/api/products?search=` +
+          encodeURIComponent(q)
       );
       setProducts(r.products || []);
       track('view_home', { q });

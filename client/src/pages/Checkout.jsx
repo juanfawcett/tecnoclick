@@ -19,21 +19,24 @@ export default function Checkout() {
 
   async function pay() {
     try {
-      const r = await api(`${import.meta.env.VITE_API_URL}/api/`, {
-        method: 'POST',
-        body: {
-          email,
-          shipping,
-          billing,
-          coupon_code: coupon || null,
-          payment_method: method,
-        },
-      });
+      const r = await api(
+        `${import.meta.env.VITE_API_URL}/api/orders/checkout`,
+        {
+          method: 'POST',
+          body: {
+            email,
+            shipping,
+            billing,
+            coupon_code: coupon || null,
+            payment_method: method,
+          },
+        }
+      );
       if (r.status === 'under_review') {
         alert('Tu orden está en revisión.');
         return;
       }
-      const p = await api(`${import.meta.env.VITE_API_URL}/api/`, {
+      const p = await api(`${import.meta.env.VITE_API_URL}/api/payments/init`, {
         method: 'POST',
         body: { order_id: r.order_id, method },
       });

@@ -8,7 +8,9 @@ export default function Profile() {
   useEffect(() => {
     (async () => {
       try {
-        const { user } = await api(`${import.meta.env.VITE_API_URL}/api/`);
+        const { user } = await api(
+          `${import.meta.env.VITE_API_URL}/api/auth/profile`
+        );
         setName(user.name || '');
         setAddress(user.address || {});
       } catch {}
@@ -16,7 +18,7 @@ export default function Profile() {
   }, []);
   async function save() {
     try {
-      await api(`${import.meta.env.VITE_API_URL}/api/`, {
+      await api(`${import.meta.env.VITE_API_URL}/api/auth/profile`, {
         method: 'PUT',
         body: { name, address },
       });

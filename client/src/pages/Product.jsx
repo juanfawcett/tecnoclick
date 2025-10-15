@@ -22,9 +22,13 @@ export default function Product() {
   const { user } = useAuth();
 
   async function load() {
-    const { product } = await api(`${import.meta.env.VITE_API_URL}/api/` + id);
+    const { product } = await api(
+      `${import.meta.env.VITE_API_URL}/api/products/` + id
+    );
     setProduct(product);
-    const r = await api(`/api/products/${id}/reviews`);
+    const r = await api(
+      `${import.meta.env.VITE_API_URL}/api/products/${id}/reviews`
+    );
     setReviews(r.reviews || []);
     track('view_product', { id: Number(id) });
   }
@@ -33,7 +37,7 @@ export default function Product() {
   }, [id]);
 
   async function addCart() {
-    await api(`${import.meta.env.VITE_API_URL}/api/`, {
+    await api(`${import.meta.env.VITE_API_URL}/api/cart/items`, {
       method: 'POST',
       body: { product_id: Number(id), qty: 1 },
     });
@@ -46,7 +50,7 @@ export default function Product() {
   }
   async function fav() {
     try {
-      await api(`${import.meta.env.VITE_API_URL}/api/` + id, {
+      await api(`${import.meta.env.VITE_API_URL}/api/cart/favorites/` + id, {
         method: 'POST',
       });
     } catch (e) {
@@ -58,7 +62,7 @@ export default function Product() {
   }
   async function createLayaway() {
     try {
-      await api(`${import.meta.env.VITE_API_URL}/api/`, {
+      await api(`${import.meta.env.VITE_API_URL}/api/layaway/create`, {
         method: 'POST',
         body: { product_id: Number(id), deposit_percent: 20, installments: 3 },
       });
@@ -69,7 +73,7 @@ export default function Product() {
   }
   async function postReview() {
     try {
-      await api(`/api/products/${id}/reviews`, {
+      await api(`${import.meta.env.VITE_API_URL}/api/products/${id}/reviews`, {
         method: 'POST',
         body: { rating: Number(rating), comment },
       });
