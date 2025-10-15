@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export function authRequired(req, res, next) {
-  next();
-  return;
+  console.log('🚀 ~ authRequired ~ req:', req);
   const token = req.cookies['tc_jwt'];
   if (!token) return res.status(401).json({ error: 'No autenticado' });
   try {
@@ -15,6 +14,7 @@ export function authRequired(req, res, next) {
 }
 
 export function adminOnly(req, res, next) {
+  console.log('🚀 ~ adminOnly ~ req:', req);
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'No autorizado' });
   }
