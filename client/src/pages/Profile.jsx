@@ -8,7 +8,7 @@ export default function Profile() {
   useEffect(() => {
     (async () => {
       try {
-        const { user } = await api(`${process.env.API_URL}/api/`);
+        const { user } = await api(`${import.meta.env.VITE_API_URL}/api/`);
         setName(user.name || '');
         setAddress(user.address || {});
       } catch {}
@@ -16,7 +16,7 @@ export default function Profile() {
   }, []);
   async function save() {
     try {
-      await api(`${process.env.API_URL}/api/`, {
+      await api(`${import.meta.env.VITE_API_URL}/api/`, {
         method: 'PUT',
         body: { name, address },
       });

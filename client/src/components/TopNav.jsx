@@ -20,7 +20,7 @@ export default function TopNav() {
 
   async function refreshCount() {
     try {
-      const r = await api(`${process.env.API_URL}/api/`);
+      const r = await api(`${import.meta.env.VITE_API_URL}/api/`);
       const c = r.items.reduce((s, i) => s + i.qty, 0);
       setCount(c);
     } catch {}

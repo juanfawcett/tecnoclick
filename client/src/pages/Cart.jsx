@@ -8,7 +8,7 @@ export default function Cart() {
   const [coupon, setCoupon] = useState('');
 
   async function load() {
-    const r = await api(`${process.env.API_URL}/api/`);
+    const r = await api(`${import.meta.env.VITE_API_URL}/api/`);
     setItems(r.items || []);
     const sum = r.items.reduce(
       (s, i) => s + i.discounted_price_cents * i.qty,
@@ -21,13 +21,15 @@ export default function Cart() {
   }, []);
 
   async function removeItem(id) {
-    await api(`${process.env.API_URL}/api/` + id, { method: 'DELETE' });
+    await api(`${import.meta.env.VITE_API_URL}/api/` + id, {
+      method: 'DELETE',
+    });
     await load();
     window.dispatchEvent(new Event('cart:update'));
   }
   async function applyCup() {
     try {
-      const r = await api(`${process.env.API_URL}/api/`, {
+      const r = await api(`${import.meta.env.VITE_API_URL}/api/`, {
         method: 'POST',
         body: { code: coupon.trim() },
       });

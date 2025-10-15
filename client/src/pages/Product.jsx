@@ -22,7 +22,7 @@ export default function Product() {
   const { user } = useAuth();
 
   async function load() {
-    const { product } = await api(`${process.env.API_URL}/api/` + id);
+    const { product } = await api(`${import.meta.env.VITE_API_URL}/api/` + id);
     setProduct(product);
     const r = await api(`/api/products/${id}/reviews`);
     setReviews(r.reviews || []);
@@ -33,7 +33,7 @@ export default function Product() {
   }, [id]);
 
   async function addCart() {
-    await api(`${process.env.API_URL}/api/`, {
+    await api(`${import.meta.env.VITE_API_URL}/api/`, {
       method: 'POST',
       body: { product_id: Number(id), qty: 1 },
     });
@@ -46,7 +46,9 @@ export default function Product() {
   }
   async function fav() {
     try {
-      await api(`${process.env.API_URL}/api/` + id, { method: 'POST' });
+      await api(`${import.meta.env.VITE_API_URL}/api/` + id, {
+        method: 'POST',
+      });
     } catch (e) {
       alert('Requiere iniciar sesión');
     }
@@ -56,7 +58,7 @@ export default function Product() {
   }
   async function createLayaway() {
     try {
-      await api(`${process.env.API_URL}/api/`, {
+      await api(`${import.meta.env.VITE_API_URL}/api/`, {
         method: 'POST',
         body: { product_id: Number(id), deposit_percent: 20, installments: 3 },
       });

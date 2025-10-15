@@ -12,7 +12,7 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       const r = await api(
-        `${process.env.API_URL}/api/` + encodeURIComponent(q)
+        `${import.meta.env.VITE_API_URL}/api/` + encodeURIComponent(q)
       );
       setProducts(r.products || []);
       track('view_home', { q });

@@ -8,7 +8,7 @@ export default function Favorites() {
   useEffect(() => {
     (async () => {
       try {
-        const r = await api(`${process.env.API_URL}/api/`);
+        const r = await api(`${import.meta.env.VITE_API_URL}/api/`);
         setItems(r.favorites || []);
       } catch {}
     })();

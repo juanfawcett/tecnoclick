@@ -24,10 +24,10 @@ export default function Admin() {
   const [cval, setCval] = useState('');
 
   async function load() {
-    const ps = await api(`${process.env.API_URL}/api/`);
+    const ps = await api(`${import.meta.env.VITE_API_URL}/api/`);
     setProducts(ps.products || []);
     try {
-      const cs = await api(`${process.env.API_URL}/api/`);
+      const cs = await api(`${import.meta.env.VITE_API_URL}/api/`);
       setCoupons(cs.coupons || []);
     } catch {}
   }
@@ -36,7 +36,7 @@ export default function Admin() {
   }, []);
 
   async function saveProduct() {
-    await api(`${process.env.API_URL}/api/`, {
+    await api(`${import.meta.env.VITE_API_URL}/api/`, {
       method: 'POST',
       body: {
         sku,
@@ -57,7 +57,7 @@ export default function Admin() {
     load();
   }
   async function saveCoupon() {
-    await api(`${process.env.API_URL}/api/`, {
+    await api(`${import.meta.env.VITE_API_URL}/api/`, {
       method: 'POST',
       body: { code: ccode, kind: ckind, value: Number(cval) },
     });

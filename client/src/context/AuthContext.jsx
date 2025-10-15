@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     (async () => {
       try {
-        const { user } = await api(`${process.env.API_URL}/api/`);
+        const { user } = await api(`${import.meta.env.VITE_API_URL}/api/`);
         setUser(user);
       } catch {}
       setLoading(false);
@@ -18,21 +18,21 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(email, password) {
-    const data = await api(`${process.env.API_URL}/api/`, {
+    const data = await api(`${import.meta.env.VITE_API_URL}/api/`, {
       method: 'POST',
       body: { email, password },
     });
     setUser(data.user);
   }
   async function register({ name, email, password }) {
-    const data = await api(`${process.env.API_URL}/api/`, {
+    const data = await api(`${import.meta.env.VITE_API_URL}/api/`, {
       method: 'POST',
       body: { name, email, password },
     });
     setUser(data.user);
   }
   async function logout() {
-    await api(`${process.env.API_URL}/api/`, { method: 'POST' });
+    await api(`${import.meta.env.VITE_API_URL}/api/`, { method: 'POST' });
     setUser(null);
   }
 
