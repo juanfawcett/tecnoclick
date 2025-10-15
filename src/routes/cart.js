@@ -27,13 +27,15 @@ router.get('/', async (req, res) => {
   const db = getDb();
   try {
     const cartId = getCartId(req, res);
-    let cart = await get(db, `SELECT * FROM carts WHERE id=?`, [cartId]);
+    let cart = await get(db, `SELECT * FROM carts WHERE id=$1`, [cartId]);
     if (!cart) {
-      await run(db, `INSERT INTO carts (id,user_id) VALUES (?,NULL)`, [cartId]);
+      await run(db, `INSERT INTO carts (id,user_id) VALUES ($1,NULL)`, [
+        cartId,
+      ]);
     }
     const items = await all(
       db,
-      `SELECT ci.*, p.name, p.price_cents, p.stock FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=?`,
+      `SELECT ci.*, p.name, p.price_cents, p.stock FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=$1`,
       [cartId]
     );
     const withDiscounts = await applyQuantityDiscounts(
@@ -61,7 +63,7 @@ router.post('/items', async (req, res) => {
   const db = getDb();
   try {
     const { product_id, qty } = req.body;
-    const p = await get(db, `SELECT * FROM products WHERE id=? AND active=1`, [
+    const p = await get(db, `SELECT * FROM products WHERE id=$1 AND active=1`, [
       product_id,
     ]);
     if (!p) return res.status(404).json({ error: 'Producto no disponible' });
@@ -78,24 +80,22 @@ router.post('/items', async (req, res) => {
     })();
     const existing = await get(
       db,
-      `SELECT * FROM cart_items WHERE cart_id=? AND product_id=?`,
+      `SELECT * FROM cart_items WHERE cart_id=$1 AND product_id=$2`,
       [ensuredId, product_id]
     );
     if (existing) {
-      await run(db, `UPDATE cart_items SET qty=qty+? WHERE id=?`, [
+      await run(db, `UPDATE cart_items SET qty=qty+$1 WHERE id=$2`, [
         qty,
         existing.id,
       ]);
     } else {
       await run(
         db,
-        `INSERT INTO cart_items (cart_id,product_id,qty,price_cents_snapshot) VALUES (?,?,?,?)`,
+        `INSERT INTO cart_items (cart_id,product_id,qty,price_cents_snapshot) VALUES ($1,$2,$3,$4)`,
         [ensuredId, product_id, qty, p.price_cents]
       );
     }
-    await run(db, `UPDATE carts SET updated_at=datetime('now') WHERE id=?`, [
-      ensuredId,
-    ]);
+    await run(db, `UPDATE carts SET updated_at=NOW() WHERE id=$1`, [ensuredId]);
     res.json({ ok: true });
   } catch (e) {
     console.error('🚀 ~ e:', e);
@@ -110,7 +110,7 @@ router.put('/items/:id', async (req, res) => {
   try {
     const { qty } = req.body;
     if (qty < 1) return res.status(400).json({ error: 'Cantidad inválida' });
-    await run(db, `UPDATE cart_items SET qty=? WHERE id=?`, [
+    await run(db, `UPDATE cart_items SET qty=$1 WHERE id=$2`, [
       qty,
       req.params.id,
     ]);
@@ -126,7 +126,7 @@ router.put('/items/:id', async (req, res) => {
 router.delete('/items/:id', async (req, res) => {
   const db = getDb();
   try {
-    await run(db, `DELETE FROM cart_items WHERE id=?`, [req.params.id]);
+    await run(db, `DELETE FROM cart_items WHERE id=$1`, [req.params.id]);
     res.json({ ok: true });
   } catch (e) {
     console.error('🚀 ~ e:', e);
@@ -143,7 +143,7 @@ router.post('/apply-coupon', async (req, res) => {
     const cartId = req.cookies['tc_cart'];
     const items = await all(
       db,
-      `SELECT ci.*, p.name, p.price_cents, p.stock FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=?`,
+      `SELECT ci.*, p.name, p.price_cents, p.stock FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=$1`,
       [cartId]
     );
     const withDiscounts = await applyQuantityDiscounts(
@@ -176,7 +176,7 @@ router.get('/favorites', authRequired, async (req, res) => {
   try {
     const rows = await all(
       db,
-      `SELECT p.* FROM favorites f JOIN products p ON p.id=f.product_id WHERE f.user_id=?`,
+      `SELECT p.* FROM favorites f JOIN products p ON p.id=f.product_id WHERE f.user_id=$1`,
       [req.user.id]
     );
     rows.forEach((r) => {
@@ -197,7 +197,7 @@ router.post('/favorites/:productId', authRequired, async (req, res) => {
   try {
     await run(
       db,
-      `INSERT OR IGNORE INTO favorites (user_id,product_id) VALUES (?,?)`,
+      `INSERT INTO favorites (user_id,product_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`,
       [req.user.id, req.params.productId]
     );
     res.json({ ok: true });
@@ -211,7 +211,7 @@ router.post('/favorites/:productId', authRequired, async (req, res) => {
 router.delete('/favorites/:productId', authRequired, async (req, res) => {
   const db = getDb();
   try {
-    await run(db, `DELETE FROM favorites WHERE user_id=? AND product_id=?`, [
+    await run(db, `DELETE FROM favorites WHERE user_id=$1 AND product_id=$2`, [
       req.user.id,
       req.params.productId,
     ]);

@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
     const { email, coupon_code } = req.body;
     const items = await all(
       db,
-      `SELECT ci.*, p.name, p.price_cents FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=?`,
+      `SELECT ci.*, p.name, p.price_cents FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=$1`,
       [cartId]
     );
     const withDiscounts = await applyQuantityDiscounts(
@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
     const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
     await run(
       db,
-      `INSERT INTO quotes (id,cart_id,user_id,email,pdf_path,expires_at) VALUES (?,?,?,?,?,?)`,
+      `INSERT INTO quotes (id,cart_id,user_id,email,pdf_path,expires_at) VALUES ($1,$2,$3,$4,$5,$6)`,
       [quoteId, cartId, null, email, file, expiresAt]
     );
     res.json({ id: quoteId, pdf: file, expires_at: expiresAt });

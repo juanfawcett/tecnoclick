@@ -30,7 +30,7 @@ router.get('/reports', authRequired, adminOnly, async (req, res) => {
     const { from, to } = req.query;
     const rows = await all(
       db,
-      `SELECT * FROM orders WHERE date(created_at) BETWEEN date(?) AND date(?)`,
+      `SELECT * FROM orders WHERE date(created_at) BETWEEN date($1) AND date($2)`,
       [from, to]
     );
     res.json({ orders: rows });

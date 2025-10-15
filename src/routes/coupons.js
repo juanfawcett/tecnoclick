@@ -32,7 +32,7 @@ router.post('/', authRequired, adminOnly, async (req, res) => {
     } = req.body;
     await run(
       db,
-      `INSERT INTO coupons (code,kind,value,min_cart_cents,max_uses,start_date,end_date,active) VALUES (?,?,?,?,?,?,?,?)`,
+      `INSERT INTO coupons (code,kind,value,min_cart_cents,max_uses,start_date,end_date,active) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
       [
         code,
         kind,
