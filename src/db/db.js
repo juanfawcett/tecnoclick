@@ -33,28 +33,15 @@ export function getDb() {
   return sql;
 }
 
-// Helpers promisificados
-export function run(db, sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve(this);
-    });
-  });
+// Helpers (mismo API que antes pero versión PG)
+export async function run(db, q, params = []) {
+  return db.query(q, params);
 }
-export function get(db, sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, function (err, row) {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
+export async function get(db, q, params = []) {
+  const r = await db.query(q, params);
+  return r.rows[0] || null;
 }
-export function all(db, sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, function (err, rows) {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
+export async function all(db, q, params = []) {
+  const r = await db.query(q, params);
+  return r.rows || [];
 }
