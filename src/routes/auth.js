@@ -81,6 +81,7 @@ router.get('/profile', authRequired, async (req, res) => {
 });
 
 router.put('/profile', authRequired, async (req, res) => {
+  console.log('🚀 ~ req:', req);
   const db = getDb();
   try {
     const { name, address } = req.body;

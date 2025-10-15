@@ -1,4 +1,3 @@
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { sql } from '@vercel/postgres';
@@ -10,24 +9,19 @@ let ensured = false;
 
 export async function ensureDb() {
   try {
-    console.log('🚀 ~ ensureDb ~ ensured:', ensured);
     if (ensured) return;
     ensured = true;
     // Ejecuta migraciones (schema_pg.sql) una vez por cold start
     const schemaPath = path.join(__dirname, 'schema.sql');
-    console.log('🚀 ~ ensureDb ~ schemaPath:', schemaPath);
     const ddl = fs.readFileSync(schemaPath, 'utf-8');
-    console.log('🚀 ~ ensureDb ~ ddl:', ddl);
     // dividir por ';' de forma simple
     const statements = ddl
       .split(/;\s*$/m)
       .map((s) => s.trim())
       .filter(Boolean);
-    console.log('🚀 ~ ensureDb ~ statements:', statements);
     for (const stmt of statements) {
       await sql.query(stmt);
     }
-    console.log('ended ensureDb');
   } catch (e) {
     console.error('🚀 ~ ensureDb ~ e:', e);
   }
@@ -38,15 +32,28 @@ export function getDb() {
   return sql;
 }
 
-// Helpers (mismo API que antes pero versión PG)
-export async function run(db, q, params = []) {
-  return db.query(q, params);
+// Helpers promisificados
+export function run(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function (err) {
+      if (err) reject(err);
+      else resolve(this);
+    });
+  });
 }
-export async function get(db, q, params = []) {
-  const r = await db.query(q, params);
-  return r.rows[0] || null;
+export function get(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, function (err, row) {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
 }
-export async function all(db, q, params = []) {
-  const r = await db.query(q, params);
-  return r.rows || [];
+export function all(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, function (err, rows) {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
 }
