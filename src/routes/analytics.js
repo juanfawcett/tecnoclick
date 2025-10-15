@@ -5,9 +5,7 @@ import { recordEvent } from '../services/analytics.js';
 const router = express.Router();
 
 router.post('/event', async (req, res) => {
-  console.log('🚀 ~ req:', req);
   const db = getDb();
-  console.log('🚀 ~ db:', db);
   try {
     const { event_type, payload = {} } = req.body;
     await recordEvent(db, {
@@ -53,6 +51,7 @@ router.get('/funnel', async (req, res) => {
       },
     });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();

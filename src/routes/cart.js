@@ -24,14 +24,10 @@ function getCartId(req, res) {
 }
 
 router.get('/', async (req, res) => {
-  console.log('🚀 ~ req:', req);
   const db = getDb();
-  console.log('🚀 ~ db:', db);
   try {
     const cartId = getCartId(req, res);
-    console.log('🚀 ~ cartId:', cartId);
     let cart = await get(db, `SELECT * FROM carts WHERE id=?`, [cartId]);
-    console.log('🚀 ~ cart:', cart);
     if (!cart) {
       await run(db, `INSERT INTO carts (id,user_id) VALUES (?,NULL)`, [cartId]);
     }
@@ -40,7 +36,6 @@ router.get('/', async (req, res) => {
       `SELECT ci.*, p.name, p.price_cents, p.stock FROM cart_items ci JOIN products p ON p.id=ci.product_id WHERE cart_id=?`,
       [cartId]
     );
-    console.log('🚀 ~ items:', items);
     const withDiscounts = await applyQuantityDiscounts(
       db,
       items.map((it) => ({
@@ -49,12 +44,10 @@ router.get('/', async (req, res) => {
         price_cents: it.price_cents,
       }))
     );
-    console.log('🚀 ~ withDiscounts:', withDiscounts);
     const merged = items.map((it, idx) => ({
       ...it,
       discounted_price_cents: withDiscounts[idx].discounted_price_cents,
     }));
-    console.log('🚀 ~ merged:', merged);
     res.json({ cartId, items: merged });
   } catch (e) {
     console.error('🚀 ~ e:', e);
@@ -105,6 +98,7 @@ router.post('/items', async (req, res) => {
     ]);
     res.json({ ok: true });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();
@@ -122,6 +116,7 @@ router.put('/items/:id', async (req, res) => {
     ]);
     res.json({ ok: true });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();
@@ -134,6 +129,7 @@ router.delete('/items/:id', async (req, res) => {
     await run(db, `DELETE FROM cart_items WHERE id=?`, [req.params.id]);
     res.json({ ok: true });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();
@@ -167,6 +163,7 @@ router.post('/apply-coupon', async (req, res) => {
     const totals = totalsWithCoupon(merged, coupon);
     res.json({ coupon, totals });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();
@@ -188,6 +185,7 @@ router.get('/favorites', authRequired, async (req, res) => {
     });
     res.json({ favorites: rows });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();
@@ -204,6 +202,7 @@ router.post('/favorites/:productId', authRequired, async (req, res) => {
     );
     res.json({ ok: true });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();
@@ -218,6 +217,7 @@ router.delete('/favorites/:productId', authRequired, async (req, res) => {
     ]);
     res.json({ ok: true });
   } catch (e) {
+    console.error('🚀 ~ e:', e);
     res.status(500).json({ error: 'Error' });
   } finally {
     db.close();
