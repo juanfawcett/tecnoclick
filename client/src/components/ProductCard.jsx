@@ -6,7 +6,7 @@ import { api, fmtCOP, track, CompareStore } from '../lib/api'
 
 export default function ProductCard({ p }) {
   async function add() {
-    await api('/api/cart/items', { method:'POST', body:{ product_id: p.id, qty: 1 } })
+    await api(`${process.env.API_URL}/api/`, { method:'POST', body:{ product_id: p.id, qty: 1 } })
     window.dispatchEvent(new Event('cart:update'))
     track('add_to_cart', { product_id: p.id })
   }
